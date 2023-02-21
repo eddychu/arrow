@@ -2,6 +2,9 @@
 #include "camera.h"
 #include "integrator.h"
 #include "sampler.h"
+#include <chrono>
+#include <iostream>
+#include <ostream>
 #include <vector>
 class Renderer {
 public:
@@ -14,8 +17,15 @@ public:
   void render(const Scene &scene, const Camera &camera) {
     RandomSampler sampler;
 
+    std::chrono::high_resolution_clock::time_point t1 =
+        std::chrono::high_resolution_clock::now();
     for (int y = 0; y < m_height; y++) {
+
+      std::cout << "Rendering (y = " << y << "/" << m_height << ") "
+                << "\r" << std::flush;
+
       for (int x = 0; x < m_width; x++) {
+
         glm::vec3 color(0.0f);
         for (int s = 0; s < m_spp; s++) {
           float u = (x + sampler.get_1d()) / m_width * 2.0f - 1.0f;
@@ -28,6 +38,14 @@ public:
         m_buffer[y * m_width + x] = color;
       }
     }
+
+    std::chrono::high_resolution_clock::time_point t2 =
+        std::chrono::high_resolution_clock::now();
+    /// get duration in seconds
+
+    auto duration =
+        std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
+    std::cout << "Render time: " << duration << " seconds" << std::endl;
   }
 
   void save(const std::string &filename) const;

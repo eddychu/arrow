@@ -6,7 +6,7 @@ BVH::BVH(const std::vector<std::unique_ptr<Hittable>> &list) : list(list) {}
 
 void BVH::build(const std::vector<std::unique_ptr<Hittable>> &list) {
   nodes.clear();
-  root = 0;
+  root = -1;
   std::vector<int> indices(list.size());
   std::iota(indices.begin(), indices.end(), 0);
   root = build_recursive(indices);
@@ -48,7 +48,7 @@ bool BVH::hit_node(const Ray &ray, HitRecord &record, int node) const {
   }
   HitRecord temp;
   bool hit = false;
-  float closest = ray.t_max;
+  float closest = std::min(record.t, ray.t_max);
   if (nodes[node].left < 0 && nodes[node].right < 0) {
     for (const auto &primitive : nodes[node].primitives) {
       const auto &object = list[primitive];
@@ -59,5 +59,13 @@ bool BVH::hit_node(const Ray &ray, HitRecord &record, int node) const {
       }
     }
   }
+
+  if (nodes[node].left >= 0) {
+    hit |= hit_node(ray, record, nodes[node].left);
+  }
+  if (nodes[node].right >= 0) {
+    hit |= hit_node(ray, record, nodes[node].right);
+  }
+
   return hit;
 }

@@ -63,4 +63,7 @@ BBox Scene::bbox() const {
   return output_box;
 }
 
-void Scene::build_accel() { accel = std::make_unique<BVH>(list); }
+void Scene::build_accel() {
+  accel = std::make_unique<BVH>(list);
+  accel->build(list);
+}
