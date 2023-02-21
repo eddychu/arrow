@@ -6,7 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(arrow main.cpp)
+# glob all source and header file
+file(GLOB MY_SOURCE_FILES "src/*.cpp" "src/*.h")
+
+
+add_executable(arrow ${MY_SOURCE_FILES})
 
 target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
 

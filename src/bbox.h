@@ -16,7 +16,6 @@ public:
         max_ = b;
     }
 
-    bool hit(const Ray &r, float t_min, float t_max) const;
 
     glm::vec3 min() const { return min_; }
     glm::vec3 max() const { return max_; }
@@ -74,7 +73,7 @@ public:
                 p.z >= min_.z && p.z <= max_.z);
     }
 
-    bool hit(const Ray &ray)
+    bool hit(const Ray &ray) const
     {
         auto t0 = ray.t_min;
         auto t1 = ray.t_max;
