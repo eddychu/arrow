@@ -9,7 +9,7 @@
 
 void scene1() {
   TestIntegrator integrator;
-  Renderer renderer(512, 512, 16, 10, &integrator);
+  Renderer renderer(512, 512, 1, 3, &integrator);
   Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f);
   auto material_ground =
@@ -36,9 +36,12 @@ void scene1() {
 void scene2() {
   RandomSampler sampler;
   TestIntegrator integrator;
-  Renderer renderer(300, 300, 10, 10, &integrator);
-  Camera camera(glm::vec3(13.0f, 2.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f), 30.0f, 1.0f);
+  int width = 1024;
+  int height = 768;
+  Renderer renderer(width, height, 10, 5, &integrator);
+  Camera camera(glm::vec3(13.0f, 2.5f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f), 30.0f,
+                float(width) / float(height));
   Scene scene;
   auto material_ground =
       std::make_shared<Lambertian>(glm::vec3(0.5f, 0.5f, 0.5f));
@@ -81,7 +84,7 @@ void scene2() {
   auto material2 = std::make_shared<Lambertian>(glm::vec3(0.4f, 0.2f, 0.1f));
   scene.add(
       std::make_unique<Sphere>(glm::vec3(-4.0f, 1.0f, 0.0f), 1.0f, material2));
-  auto material3 = std::make_shared<Metal>(glm::vec3(0.7f, 0.6f, 0.5f), 0.0f);
+  auto material3 = std::make_shared<Lambertian>(glm::vec3(0.7f, 0.6f, 0.5f));
   scene.add(
       std::make_unique<Sphere>(glm::vec3(4.0f, 1.0f, 0.0f), 1.0f, material3));
   scene.build_accel();

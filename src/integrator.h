@@ -13,6 +13,12 @@ public:
                        int depth) const override;
 };
 
+class WhitIntegrator : public Integrator {
+public:
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+                       int depth) const override;
+};
+
 class PathIntegrator : public Integrator {
 public:
   PathIntegrator(int max_depth) : m_max_depth(max_depth) {}

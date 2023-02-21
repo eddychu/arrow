@@ -19,10 +19,13 @@ public:
 
     std::chrono::high_resolution_clock::time_point t1 =
         std::chrono::high_resolution_clock::now();
+
+// use OpenMP to parallelize the loop
+#pragma omp parallel for
     for (int y = 0; y < m_height; y++) {
 
-      std::cout << "Rendering (y = " << y << "/" << m_height << ") "
-                << "\r" << std::flush;
+      // std::cout << "Rendering (y = " << y << "/" << m_height << ") "
+      //           << "\r" << std::flush;
 
       for (int x = 0; x < m_width; x++) {
 

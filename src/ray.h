@@ -14,6 +14,6 @@ public:
 
   glm::vec3 o;
   glm::vec3 d;
-  float t_min = std::numeric_limits<float>::epsilon();
+  float t_min = 0.0001;
   float t_max = std::numeric_limits<float>::max();
 };

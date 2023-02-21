@@ -15,5 +15,13 @@ add_executable(arrow ${MY_SOURCE_FILES})
 target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
 
 
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(arrow PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
+# find and load assimp
+find_package(assimp REQUIRED)
+target_include_directories(arrow PUBLIC ${ASSIMP_INCLUDE_DIRS})
+target_link_libraries(arrow PUBLIC assimp::assimp)
 

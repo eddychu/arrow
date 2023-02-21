@@ -16,7 +16,7 @@ public:
     auto origin = m_transform.point_to_world(glm::vec3(0, 0, 0));
     auto dir = m_transform.vector_to_world(
         glm::vec3(s * half_width, t * half_height, -1));
-    return Ray(origin, dir);
+    return Ray(origin, glm::normalize(dir));
   }
 
 private:

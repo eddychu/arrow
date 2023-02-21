@@ -62,3 +62,20 @@ public:
   std::vector<std::unique_ptr<Hittable>> list;
   std::unique_ptr<class Accel> accel = nullptr;
 };
+
+class Mesh : public Hittable {
+public:
+  Mesh(const std::vector<glm::vec3> &vertices, const std::vector<int> &indices)
+      : m_vertices(vertices), m_indices(indices) {}
+
+  virtual bool hit(const Ray &r, HitRecord &rec) const override;
+
+  virtual BBox bbox() const override;
+
+  static std::unique_ptr<Mesh> from_file(const std::string &filename);
+
+private:
+  std::vector<glm::vec3> m_vertices;
+  std::vector<int> m_indices;
+  std::string m_id = uuid::generate_uuid_v4();
+};

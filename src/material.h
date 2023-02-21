@@ -1,14 +1,20 @@
 #pragma once
 #include "ray.h"
 #include "record.h"
+#include "sampler.h"
 #include "sampling.h"
 #include <cstdlib>
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include <iostream>
 class Material {
 public:
   virtual ~Material() {}
   virtual bool scatter(const Ray &r_in, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered) const = 0;
+  virtual glm::vec3 emitted(const HitRecord &rec) const {
+    return glm::vec3(0.0f);
+  }
 };
 
 class Lambertian : public Material {
@@ -16,13 +22,25 @@ public:
   Lambertian(const glm::vec3 &a) : albedo(a) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered) const override {
-    float r1 = rand() / (RAND_MAX + 1.0);
-    float r2 = rand() / (RAND_MAX + 1.0);
 
-    auto target = rec.p + rec.normal + sample_unit_sphere(r1, r2);
-    scattered = Ray(rec.p, glm::normalize(target - rec.p));
+    auto normal =
+        glm::dot(ray.direction(), rec.normal) < 0 ? rec.normal : -rec.normal;
+    RandomSampler sampler;
+    auto r1 = sampler.get_1d();
+    auto r2 = sampler.get_1d();
+    auto sample_dir = sample_hemisphere(r1, r2);
+    // create a new coordinate system based on the normal
+    auto w = normal;
+    auto a =
+        w.x > 0.9f ? glm::vec3(0.0, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
+    auto v = glm::normalize(glm::cross(w, a));
+    auto u = glm::cross(w, v);
+    auto dir = u * sample_dir.x + v * sample_dir.y + w * sample_dir.z;
+    dir = glm::normalize(dir);
+    scattered = Ray(rec.p + rec.normal * 0.0001f, dir);
     attenuation = albedo;
-    return true;
+    // return glm::dot(rec.normal, ray.direction()) < 0;
+    return glm::dot(rec.normal, scattered.direction()) > 0;
   }
 
   glm::vec3 albedo;
@@ -39,13 +57,14 @@ public:
   }
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered) const override {
+
     glm::vec3 reflected =
         glm::reflect(glm::normalize(ray.direction()), rec.normal);
-    float r1 = rand() / (RAND_MAX + 1.0);
-    float r2 = rand() / (RAND_MAX + 1.0);
-    scattered = Ray(rec.p, reflected + fuzz * sample_unit_sphere(r1, r2));
+    // float r1 = rand() / (RAND_MAX + 1.0);
+    // float r2 = rand() / (RAND_MAX + 1.0);
+    scattered = Ray(rec.p + rec.normal * 0.0001f, glm::normalize(reflected));
     attenuation = albedo;
-    return (glm::dot(scattered.direction(), rec.normal) > 0);
+    return glm::dot(ray.direction(), rec.normal) < 0;
   }
 
   glm::vec3 albedo;
@@ -86,4 +105,18 @@ private:
     r0 = r0 * r0;
     return r0 + (1 - r0) * pow((1 - cosine), 5);
   }
+};
+
+class DiffuseLight : public Material {
+public:
+  DiffuseLight(const glm::vec3 &a) : emit(a) {}
+  virtual bool scatter(const Ray &ray, const HitRecord &rec,
+                       glm::vec3 &attenuation, Ray &scattered) const override {
+    return false;
+  }
+  virtual glm::vec3 emitted(const HitRecord &rec) const override {
+    return emit;
+  }
+
+  glm::vec3 emit;
 };
