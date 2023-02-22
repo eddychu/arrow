@@ -12,7 +12,7 @@ public:
   virtual ~Material() {}
   virtual bool scatter(const Ray &r_in, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered) const = 0;
-  virtual glm::vec3 emitted(const HitRecord &rec) const {
+  virtual glm::vec3 emitted(const Ray &ray, const HitRecord &rec) const {
     return glm::vec3(0.0f);
   }
 };
@@ -37,8 +37,9 @@ public:
     auto u = glm::cross(w, v);
     auto dir = u * sample_dir.x + v * sample_dir.y + w * sample_dir.z;
     dir = glm::normalize(dir);
-    scattered = Ray(rec.p + rec.normal * 0.0001f, dir);
+    scattered = Ray(rec.p + normal * 0.0001f, dir);
     attenuation = albedo;
+    return true;
     // return glm::dot(rec.normal, ray.direction()) < 0;
     return glm::dot(rec.normal, scattered.direction()) > 0;
   }
@@ -60,8 +61,6 @@ public:
 
     glm::vec3 reflected =
         glm::reflect(glm::normalize(ray.direction()), rec.normal);
-    // float r1 = rand() / (RAND_MAX + 1.0);
-    // float r2 = rand() / (RAND_MAX + 1.0);
     scattered = Ray(rec.p + rec.normal * 0.0001f, glm::normalize(reflected));
     attenuation = albedo;
     return glm::dot(ray.direction(), rec.normal) < 0;
@@ -114,8 +113,13 @@ public:
                        glm::vec3 &attenuation, Ray &scattered) const override {
     return false;
   }
-  virtual glm::vec3 emitted(const HitRecord &rec) const override {
-    return emit;
+  virtual glm::vec3 emitted(const Ray &ray,
+                            const HitRecord &rec) const override {
+    if (glm::dot(rec.normal, ray.direction()) < 0) {
+      return emit;
+    } else {
+      return glm::vec3(0.0f);
+    }
   }
 
   glm::vec3 emit;

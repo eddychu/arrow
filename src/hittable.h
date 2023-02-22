@@ -65,8 +65,9 @@ public:
 
 class Mesh : public Hittable {
 public:
-  Mesh(const std::vector<glm::vec3> &vertices, const std::vector<int> &indices)
-      : m_vertices(vertices), m_indices(indices) {}
+  Mesh(const std::vector<glm::vec3> &vertices, const std::vector<int> &indices,
+       std::shared_ptr<Material> mat)
+      : m_vertices(vertices), m_indices(indices), m_material(mat) {}
 
   virtual bool hit(const Ray &r, HitRecord &rec) const override;
 
@@ -74,8 +75,17 @@ public:
 
   static std::unique_ptr<Mesh> from_file(const std::string &filename);
 
+  virtual std::optional<std::string> id() const override {
+      return m_id;
+  }
+
+  virtual std::shared_ptr<Material> material() const override {
+    return m_material;
+  }
+
 private:
   std::vector<glm::vec3> m_vertices;
   std::vector<int> m_indices;
+  std::shared_ptr<Material> m_material = nullptr;
   std::string m_id = uuid::generate_uuid_v4();
 };

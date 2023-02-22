@@ -9,6 +9,10 @@
 #include <memory>
 #include <stdexcept>
 
+// include assimp headers
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
 bool Sphere::hit(const Ray &r, HitRecord &rec) const {
   glm::vec3 oc = r.origin() - center;
   float a = glm::dot(r.direction(), r.direction());
@@ -30,6 +34,9 @@ bool Sphere::hit(const Ray &r, HitRecord &rec) const {
     rec.t = root;
     rec.p = r.at(rec.t);
     rec.normal = (rec.p - center) / radius;
+    if (glm::dot(r.direction(), rec.normal) > 0) {
+      rec.normal = -rec.normal;
+    }
     rec.object_id = id();
     return true;
   }
@@ -83,22 +90,40 @@ void Scene::build_accel() {
 bool Mesh::hit(const Ray &ray, HitRecord &rec) const {
   bool is_hit = false;
   float closest_so_far = glm::min(rec.t, ray.t_max);
-  for (int i = 0; i < m_indices.size(); i += 3) {
+  for (size_t i = 0; i < m_indices.size(); i += 3) {
     const auto &v0 = m_vertices[m_indices[i]];
     const auto &v1 = m_vertices[m_indices[i + 1]];
     const auto &v2 = m_vertices[m_indices[i + 2]];
-    glm::vec3 position;
-    if (glm::intersectLineTriangle(ray.origin(), ray.direction(), v0, v1, v2,
-                                   position)) {
-      auto t = glm::distance(ray.origin(), position);
-      if (t < closest_so_far) {
-        closest_so_far = t;
-        rec.t = t;
-        rec.p = position;
-        rec.normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-        rec.object_id = id();
-        is_hit = true;
-      }
+
+    auto e1 = v1 - v0;
+    auto e2 = v2 - v0;
+    auto h = glm::cross(ray.direction(), e2);
+    auto a = glm::dot(e1, h);
+    if (a > -0.00001 && a < 0.00001) {
+      continue;
+    }
+    auto f = 1.0 / a;
+    auto s = ray.origin() - v0;
+    auto u = f * glm::dot(s, h);
+    if (u < 0.0 || u > 1.0) {
+      continue;
+    }
+    auto q = glm::cross(s, e1);
+    auto v = f * glm::dot(ray.direction(), q);
+    if (v < 0.0 || u + v > 1.0) {
+      continue;
+    }
+    auto t = f * glm::dot(e2, q);
+    if (t > ray.t_min && t < closest_so_far) {
+      closest_so_far = t;
+      rec.t = t;
+      rec.p = ray.at(t);
+      auto normal = glm::normalize(glm::cross(e1, e2));
+
+      rec.normal = glm::dot(normal, ray.direction()) > 0 ? -normal : normal;
+
+      rec.object_id = id();
+      is_hit = true;
     }
   }
   return is_hit;
@@ -119,39 +144,38 @@ BBox Mesh::bbox() const {
 }
 
 std::unique_ptr<Mesh> Mesh::from_file(const std::string &filename) {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "Failed to open file: " << filename << std::endl;
-    return nullptr;
-  }
-  std::vector<glm::vec3> vertices;
-  std::vector<glm::vec3> normals;
-  std::vector<glm::vec2> texcoords;
-  std::vector<int> indices;
-  std::string line;
-  while (std::getline(file, line)) {
-    // std::istringstream iss(line);
-    // std::string type;
-    // iss >> type;
-    // if (type == "v") {
-    //   glm::vec3 v;
-    //   iss >> v.x >> v.y >> v.z;
-    //   vertices.push_back(v);
-    // } else if (type == "vn") {
-    //   glm::vec3 n;
-    //   iss >> n.x >> n.y >> n.z;
-    //   normals.push_back(n);
-    // } else if (type == "vt") {
-    //   glm::vec2 t;
-    //   iss >> t.x >> t.y;
-    //   texcoords.push_back(t);
-    // } else if (type == "f") {
-    //   std::string v1, v2, v3;
-    //   iss >> v1 >> v2 >> v3;
-    //   indices.push_back(parse_vertex(v1));
-    //   indices.push_back(parse_vertex(v2));
-    //   indices.push_back(parse_vertex(v3));
-    // }
-  }
-  return std::make_unique<Mesh>(vertices, indices);
+  // std::ifstream file(filename);
+  // if (!file.is_open()) {
+  //   std::cerr << "Failed to open file: " << filename << std::endl;
+  //   return nullptr;
+  // }
+  // std::vector<glm::vec3> vertices;
+  // std::vector<glm::vec3> normals;
+  // std::vector<glm::vec2> texcoords;
+  // std::vector<int> indices;
+  // std::string line;
+  // while (std::getline(file, line)) {
+  // std::istringstream iss(line);
+  // std::string type;
+  // iss >> type;
+  // if (type == "v") {
+  //   glm::vec3 v;
+  //   iss >> v.x >> v.y >> v.z;
+  //   vertices.push_back(v);
+  // } else if (type == "vn") {
+  //   glm::vec3 n;
+  //   iss >> n.x >> n.y >> n.z;
+  //   normals.push_back(n);
+  // } else if (type == "vt") {
+  //   glm::vec2 t;
+  //   iss >> t.x >> t.y;
+  //   texcoords.push_back(t);
+  // } else if (type == "f") {
+  //   std::string v1, v2, v3;
+  //   iss >> v1 >> v2 >> v3;
+  //   indices.push_back(parse_vertex(v1));
+  //   indices.push_back(parse_vertex(v2));
+  //   indices.push_back(parse_vertex(v3));
+  // }
 }
+// return std::make_unique<Mesh>(vertices, indices);

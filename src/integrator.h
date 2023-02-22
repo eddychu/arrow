@@ -28,3 +28,15 @@ public:
 private:
   int m_max_depth;
 };
+
+class NormalIntegrator : public Integrator {
+public:
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+                       int depth) const override;
+};
+
+class VisibilityIntegrator : public Integrator {
+public:
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+                       int depth) const override;
+};
