@@ -257,6 +257,25 @@ void scene5() {
                         12, 14, 13, 12, 19, 18, 16, 18, 17, 16}),
       white);
 
+  auto tall_block = std::make_unique<Mesh>(
+      std::vector<glm::vec3>({
+          glm::vec3(423.0f, 330.0, 247.0),   glm::vec3(265.0f, 330.0f, 296.0f),
+          glm::vec3(314.0f, 330.0f, 456.0f), glm::vec3(472.0f, 330.0f, 406.0f),
+          glm::vec3(423.0f, 0.0f, 247.0f),   glm::vec3(423.0f, 330.0f, 247.0f),
+          glm::vec3(472.0f, 330.0f, 406.0f), glm::vec3(472.0f, 0.0f, 406.0f),
+          glm::vec3(472.0f, 0.0f, 406.0f),   glm::vec3(472.0f, 330.0f, 406.0f),
+          glm::vec3(314.0f, 330.0f, 456.0f), glm::vec3(314.0f, 0.0f, 456.0f),
+          glm::vec3(314.0f, 0.0f, 456.0f),   glm::vec3(314.0f, 330.0f, 456.0f),
+          glm::vec3(265.0f, 330.0f, 296.0f), glm::vec3(265.0f, 0.0f, 296.0f),
+          glm::vec3(265.0f, 0.0f, 296.0f),   glm::vec3(265.0f, 330.0f, 296.0f),
+          glm::vec3(423.0f, 330.0f, 247.0f), glm::vec3(423.0f, 0.0f, 247.0f),
+
+      }),
+      std::vector<int>({3,  2,  0,  2,  1,  0,  7,  6,  4,  6,
+                        5,  4,  11, 10, 8,  10, 9,  8,  15, 14,
+                        12, 14, 13, 12, 19, 18, 16, 18, 17, 16}),
+      white);
+
   Scene scene;
   // scene.add(std::move(left_wall));
   //  scene.add(std::move(right_wall));
@@ -269,6 +288,7 @@ void scene5() {
   scene.add(std::move(floor));
   scene.add(std::move(back_wall));
   scene.add(std::move(short_block));
+  scene.add(std::move(tall_block));
   scene.build_accel();
   renderer.render(scene, camera);
   renderer.save("scene5.png");
