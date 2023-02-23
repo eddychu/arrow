@@ -15,7 +15,6 @@ public:
   }
 
   void render(const Scene &scene, const Camera &camera) {
-    RandomSampler sampler;
 
     std::chrono::high_resolution_clock::time_point t1 =
         std::chrono::high_resolution_clock::now();
@@ -28,13 +27,13 @@ public:
       //           << "\r" << std::flush;
 
       for (int x = 0; x < m_width; x++) {
-
+          RandomSampler sampler;
         glm::vec3 color(0.0f);
         for (int s = 0; s < m_spp; s++) {
           float u = (x + sampler.get_1d()) / m_width * 2.0f - 1.0f;
           float v = 1.0f - (y + sampler.get_1d()) / m_height * 2.0f;
           Ray ray = camera.get_ray(u, v);
-          color += m_integrator->li(ray, scene, m_depth);
+          color += m_integrator->li(ray, scene, &sampler,  m_depth);
         }
         color /= m_spp;
         color = glm::pow(color, glm::vec3(1.0f / 2.2f));

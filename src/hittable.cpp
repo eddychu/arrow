@@ -1,8 +1,11 @@
 #include "hittable.h"
 #include "accel.h"
 #include "bbox.h"
+#include "record.h"
+#include "sampler.h"
 #include <fstream>
 #include <glm/ext/scalar_common.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <iostream>
 #include <istream>
@@ -143,6 +146,35 @@ BBox Mesh::bbox() const {
   return output_box;
 }
 
+
+glm::vec3 Mesh::sample(const HitRecord& rec, Sampler* sampler) const {
+
+  auto index = static_cast<size_t>(sampler->get_1d() * (m_indices.size() / 3));
+  const auto &v0 = m_vertices[m_indices[index]];
+  const auto &v1 = m_vertices[m_indices[index + 1]];
+  const auto &v2 = m_vertices[m_indices[index + 2]];
+  auto u = sampler->get_1d();
+  auto v = sampler->get_1d();
+  if (u + v > 1) {
+    u = 1 - u;
+    v = 1 - v;
+  }
+  auto p = v0 + u * (v1 - v0) + v * (v2 - v0);
+  return glm::normalize(p - rec.p);
+}
+
+
+float Mesh::pdf(const HitRecord &rec, const glm::vec3 &dir) const {
+  HitRecord test_rec;
+  Ray test_ray(rec.p, dir);
+  if (!hit(test_ray, test_rec)) {
+    return 0.0f;
+  }
+  auto distance_squared = test_rec.t * test_rec.t;
+  auto cosine = glm::abs(glm::dot(dir, test_rec.normal));
+  return distance_squared / (cosine * area);
+}
+
 std::unique_ptr<Mesh> Mesh::from_file(const std::string &filename) {
   // std::ifstream file(filename);
   // if (!file.is_open()) {
@@ -177,5 +209,6 @@ std::unique_ptr<Mesh> Mesh::from_file(const std::string &filename) {
   //   indices.push_back(parse_vertex(v2));
   //   indices.push_back(parse_vertex(v3));
   // }
+  return nullptr;
 }
 // return std::make_unique<Mesh>(vertices, indices);

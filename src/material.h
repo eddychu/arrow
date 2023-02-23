@@ -11,37 +11,53 @@ class Material {
 public:
   virtual ~Material() {}
   virtual bool scatter(const Ray &r_in, const HitRecord &rec,
-                       glm::vec3 &attenuation, Ray &scattered) const = 0;
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const = 0;
   virtual glm::vec3 emitted(const Ray &ray, const HitRecord &rec) const {
     return glm::vec3(0.0f);
   }
+
+  virtual glm::vec3 emitted() const {
+    return glm::vec3(0.0f);
+  }
+
+  virtual float scattering_pdf(const Ray& ray, const HitRecord& rec, const Ray& scattered) const {
+    return 0.0f;
+  }
+
 };
 
 class Lambertian : public Material {
 public:
   Lambertian(const glm::vec3 &a) : albedo(a) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
-                       glm::vec3 &attenuation, Ray &scattered) const override {
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
 
-    auto normal =
-        glm::dot(ray.direction(), rec.normal) < 0 ? rec.normal : -rec.normal;
+    // auto normal =
+    //     glm::dot(ray.direction(), rec.normal) < 0 ? rec.normal : -rec.normal;
     RandomSampler sampler;
     auto r1 = sampler.get_1d();
     auto r2 = sampler.get_1d();
-    auto sample_dir = sample_hemisphere(r1, r2);
+    auto sample_dir = sample_cosine_weighted_hemisphere(r1, r2);
     // create a new coordinate system based on the normal
-    auto w = normal;
+    auto w = rec.normal;
     auto a =
         w.x > 0.9f ? glm::vec3(0.0, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
     auto v = glm::normalize(glm::cross(w, a));
     auto u = glm::cross(w, v);
     auto dir = u * sample_dir.x + v * sample_dir.y + w * sample_dir.z;
     dir = glm::normalize(dir);
-    scattered = Ray(rec.p + normal * 0.0001f, dir);
+    scattered = Ray(rec.p + rec.normal * 0.0001f, dir);
     attenuation = albedo;
+    pdf = glm::dot(rec.normal, dir) / M_PI;
     return true;
+
     // return glm::dot(rec.normal, ray.direction()) < 0;
-    return glm::dot(rec.normal, scattered.direction()) > 0;
+    // return glm::dot(rec.normal, scattered.direction()) > 0;
+  }
+
+  virtual float scattering_pdf(const Ray& ray, const HitRecord& rec, const Ray& scattered) const override {
+    auto cosine = glm::dot(rec.normal, scattered.direction());
+    return cosine < 0.0f ? 0.0f : cosine / M_PI;
   }
 
   glm::vec3 albedo;
@@ -57,12 +73,13 @@ public:
     }
   }
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
-                       glm::vec3 &attenuation, Ray &scattered) const override {
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
 
     glm::vec3 reflected =
         glm::reflect(glm::normalize(ray.direction()), rec.normal);
     scattered = Ray(rec.p + rec.normal * 0.0001f, glm::normalize(reflected));
     attenuation = albedo;
+    pdf = 1.0f;
     return glm::dot(ray.direction(), rec.normal) < 0;
   }
 
@@ -75,7 +92,7 @@ class Dielectric : public Material {
 public:
   Dielectric(float ri) : ref_idx(ri) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
-                       glm::vec3 &attenuation, Ray &scattered) const override {
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
     attenuation = glm::vec3(1.0, 1.0, 1.0);
     bool is_front = dot(ray.direction(), rec.normal) < 0;
     auto normal = is_front ? rec.normal : -rec.normal;
@@ -93,6 +110,7 @@ public:
       // only refract
       scattered = Ray(rec.p, normalize(refract_dir));
     }
+    pdf = 1.0f;
     return true;
   }
 
@@ -110,7 +128,7 @@ class DiffuseLight : public Material {
 public:
   DiffuseLight(const glm::vec3 &a) : emit(a) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
-                       glm::vec3 &attenuation, Ray &scattered) const override {
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
     return false;
   }
   virtual glm::vec3 emitted(const Ray &ray,
@@ -120,6 +138,10 @@ public:
     } else {
       return glm::vec3(0.0f);
     }
+  }
+
+  virtual glm::vec3 emitted() const override {
+    return emit;
   }
 
   glm::vec3 emit;

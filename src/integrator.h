@@ -2,41 +2,41 @@
 #include "accel.h"
 #include "hittable.h"
 #include "ray.h"
+#include "sampler.h"
 class Integrator {
 public:
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene, int depth) const = 0;
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene, Sampler* sampler, int depth) const = 0;
 };
 
 class TestIntegrator : public Integrator {
 public:
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
 };
 
 class WhitIntegrator : public Integrator {
 public:
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
 };
 
 class PathIntegrator : public Integrator {
 public:
-  PathIntegrator(int max_depth) : m_max_depth(max_depth) {}
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
-
 private:
-  int m_max_depth;
+  glm::vec3 sample_lights(const Ray &ray, const HitRecord &record,
+                          const Scene &scene, Sampler* sampler,  float& pdf) const;
 };
 
 class NormalIntegrator : public Integrator {
 public:
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
 };
 
 class VisibilityIntegrator : public Integrator {
 public:
-  virtual glm::vec3 li(const Ray &ray, const Scene &scene,
+  virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
 };

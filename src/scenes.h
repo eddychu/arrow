@@ -35,7 +35,7 @@ void scene1() {
 }
 
 void scene2() {
-  RandomSampler sampler;
+    RandomSampler sampler;
   TestIntegrator integrator;
   int width = 1024;
   int height = 768;
@@ -88,7 +88,7 @@ void scene2() {
   auto material3 = std::make_shared<Lambertian>(glm::vec3(0.7f, 0.6f, 0.5f));
   scene.add(
       std::make_unique<Sphere>(glm::vec3(4.0f, 1.0f, 0.0f), 1.0f, material3));
-  scene.build_accel();
+  scene.build();
   renderer.render(scene, camera);
   renderer.save("scene2.png");
 }
@@ -135,7 +135,7 @@ void scene3() {
   scene.add(std::make_unique<Sphere>(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f,
                                      material_right));
   scene.add(std::make_unique<Mesh>(vertices, indices, material_light));
-  scene.build_accel();
+  scene.build();
   renderer.render(scene, camera);
   renderer.save("scene3.png");
 }
@@ -166,7 +166,7 @@ void scene4() {
       }),
       std::vector<int>({0, 1, 2, 0, 2, 3}),
       std::make_shared<DiffuseLight>(glm::vec3(4.0f, 4.0f, 4.0f))));
-  scene.build_accel();
+  scene.build();
   renderer.render(scene, camera);
   renderer.save("scene4.png");
 }
@@ -174,10 +174,10 @@ void scene4() {
 /// cornell box
 void scene5() {
   RandomSampler sampler;
-  WhitIntegrator integrator;
+  PathIntegrator integrator;
   int width = 600;
   int height = 600;
-  Renderer renderer(width, height, 400, 50, &integrator);
+  Renderer renderer(width, height, 200, 5, &integrator);
   Camera camera(glm::vec3(278.0f, 278.0f, -800.0f),
                 glm::vec3(278.0f, 278.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
                 40.0f, float(width) / float(height));
@@ -289,7 +289,7 @@ void scene5() {
   scene.add(std::move(back_wall));
   scene.add(std::move(short_block));
   scene.add(std::move(tall_block));
-  scene.build_accel();
+  scene.build();
   renderer.render(scene, camera);
   renderer.save("scene5.png");
 }
