@@ -20,7 +20,7 @@ public:
         std::chrono::high_resolution_clock::now();
 
 // use OpenMP to parallelize the loop
-// #pragma omp parallel for
+#pragma omp parallel for
     for (int y = 0; y < m_height; y++) {
 
       // std::cout << "Rendering (y = " << y << "/" << m_height << ") "
