@@ -177,7 +177,7 @@ void scene5() {
   PathIntegrator integrator;
   int width = 600;
   int height = 600;
-  Renderer renderer(width, height, 200, 5, &integrator);
+  Renderer renderer(width, height, 100, 10, &integrator);
   Camera camera(glm::vec3(278.0f, 278.0f, -800.0f),
                 glm::vec3(278.0f, 278.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
                 40.0f, float(width) / float(height));
@@ -291,5 +291,5 @@ void scene5() {
   scene.add(std::move(tall_block));
   scene.build();
   renderer.render(scene, camera);
-  renderer.save("scene5.png");
+  renderer.save("scene523.png");
 }

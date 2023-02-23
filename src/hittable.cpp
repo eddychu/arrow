@@ -3,6 +3,8 @@
 #include "bbox.h"
 #include "record.h"
 #include "sampler.h"
+#include "sampling.h"
+#include <cmath>
 #include <fstream>
 #include <glm/ext/scalar_common.hpp>
 #include <glm/geometric.hpp>
@@ -11,7 +13,6 @@
 #include <istream>
 #include <memory>
 #include <stdexcept>
-
 // include assimp headers
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -45,6 +46,34 @@ bool Sphere::hit(const Ray &r, HitRecord &rec) const {
   }
   return false;
 }
+
+
+glm::vec3 Sphere::sample(const HitRecord& rec, Sampler* sampler) const {
+    glm::vec3 direction = center - rec.p;
+    auto distance_squared = glm::dot(direction, direction);
+    // create a new coordinate system based on the normal
+    auto w = direction;
+    auto a =
+        w.x > 0.9f ? glm::vec3(0.0, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
+    auto v = glm::normalize(glm::cross(w, a));
+    auto u = glm::cross(w, v);
+    // calculate the max cosine of the cone.
+    auto cos_theta_max = sqrt(1 - radius * radius / distance_squared);
+    auto dir = sample_cone(sampler->get_1d(), sampler->get_1d(), cos_theta_max);
+    return glm::normalize(dir.x * u + dir.y * v + dir.z * w);
+}
+
+float Sphere::pdf(const HitRecord& rec, const glm::vec3& wi) const {
+    HitRecord test_rec;
+    if (!hit(Ray(rec.p, wi), test_rec)) {
+        return 0.0f;
+    }
+    auto len = glm::length(center - rec.p);
+    auto cos_theta_max = sqrt(1 - radius * radius / len * len);
+    float solid_angle = 2 * M_PI * (1 - cos_theta_max);
+    return 1 / solid_angle;
+}
+
 
 bool Scene::hit(const Ray &ray, HitRecord &rec) const {
   if (accel) {
@@ -83,6 +112,19 @@ BBox Scene::bbox() const {
     }
   }
   return output_box;
+}
+
+void Scene::build() {
+  if(!accel) {
+          build_accel();
+      }
+
+      // find all ids of lights
+      for (const auto &h : list) {
+          if (glm::length(h->material()->emitted()) > 0.0f) {
+              lights.push_back(h->id().value());
+          }
+      }
 }
 
 void Scene::build_accel() {

@@ -36,3 +36,11 @@ glm::vec3 sample_cosine_weighted_hemisphere(float u1, float u2) {
 float sample_cosine_weighted_hemisphere_pdf(float cos_theta) {
   return cos_theta / M_PI;
 }
+
+glm::vec3 sample_cone(float u1, float u2, float cos_theta_max) {
+  float z = 1 + u1 * (cos_theta_max - 1);
+  float phi = u2 * 2 * M_PI;
+  float x = sqrt(1 - z * z) * cos(phi);
+  float y = sqrt(1 - z * z) * sin(phi);
+  return glm::normalize(glm::vec3(x, y, z));
+}

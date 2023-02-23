@@ -35,6 +35,10 @@ public:
     return m_material;
   }
   virtual std::optional<std::string> id() const override { return m_id; }
+
+  virtual glm::vec3 sample(const HitRecord& rec, Sampler* sampler) const override;
+  virtual float pdf(const HitRecord& rec, const glm::vec3& dir) const override;
+
   glm::vec3 center;
   float radius;
   std::string m_id;
@@ -44,18 +48,7 @@ public:
 class Scene : public Hittable {
 public:
   Scene() {}
-  void build() {
-      if(!accel) {
-          build_accel();
-      }
-
-      // find all ids of lights
-      for (const auto &h : list) {
-          if (glm::length(h->material()->emitted()) > 0.0f) {
-              lights.push_back(h->id().value());
-          }
-      }
-  }
+  void build();
   void build_accel();
 
   void add(std::unique_ptr<Hittable> h) { list.push_back(std::move(h)); }

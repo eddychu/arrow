@@ -49,9 +49,9 @@ public:
     scattered = Ray(rec.p + rec.normal * 0.0001f, dir);
     attenuation = albedo;
     pdf = glm::dot(rec.normal, dir) / M_PI;
-    return true;
+    // return true;
 
-    // return glm::dot(rec.normal, ray.direction()) < 0;
+    return glm::dot(rec.normal, ray.direction()) < 0;
     // return glm::dot(rec.normal, scattered.direction()) > 0;
   }
 

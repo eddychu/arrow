@@ -25,7 +25,7 @@ public:
   virtual glm::vec3 li(const Ray &ray, const Scene &scene,Sampler* sampler,
                        int depth) const override;
 private:
-  glm::vec3 sample_lights(const Ray &ray, const HitRecord &record,
+  glm::vec3 sample_lights(const HitRecord &record,
                           const Scene &scene, Sampler* sampler,  float& pdf) const;
 };
 

@@ -1,11 +1,8 @@
-
-
 #include "integrator.h"
-
-#include "hittable.h"
 #include "record.h"
 #include "sampling.h"
-
+#include <memory>
+#include "pdf.h"
 glm::vec3 TestIntegrator::li(const Ray &ray, const Scene &scene,Sampler* sampler,
                              int depth) const {
   if (depth < 0) {
@@ -73,19 +70,30 @@ glm::vec3 PathIntegrator::li(const Ray &ray, const Scene &scene, Sampler* sample
       return emitted;
     }
 
-    auto light_dir = sample_lights(ray, record, scene, sampler, pdf);
-    scattered = Ray(record.p, light_dir);
-    return emitted + attenuation * material->scattering_pdf(ray, record, scattered) * li(scattered, scene, sampler, depth - 1) / pdf;
+
+    const auto& light = scene.get(scene.lights[0]);
+    HitablePDF p0(light);
+    CosinePDF p1;
+    MixPDF mix_pdf(&p0, &p1);
+    scattered = Ray(record.p, mix_pdf.sample(record, sampler));
+    pdf = mix_pdf.value(record, scattered.direction());
+
+    if (pdf > 0.0f) {
+      return emitted + material->scattering_pdf(ray, record, scattered) * attenuation  * li(scattered, scene, sampler, depth - 1) / pdf;
+    }
+    // scattered = Ray(record.p, sample_lights(record, scene, sampler, pdf));
+    return emitted;
+  
   }
 
-glm::vec3 PathIntegrator::sample_lights(const Ray &ray, const HitRecord &record,
+glm::vec3 PathIntegrator::sample_lights(const HitRecord &record,
                           const Scene &scene, Sampler* sampler, float& pdf) const {
                             auto light_index = sampler->get_1d() * scene.lights.size();
                             auto light_id = scene.lights[light_index];
                             const auto& light = scene.get(light_id);
                             auto light_dir = light->sample(record, sampler);
                             auto light_pdf = light->pdf(record, light_dir);
-                            pdf = light_pdf / scene.lights.size();
+                            pdf = light_pdf / (float)scene.lights.size();
                             return light_dir;
                           }
 
