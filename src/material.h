@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include <glm/gtc/constants.hpp>
 #include <iostream>
 class Material {
 public:
@@ -48,7 +49,7 @@ public:
     dir = glm::normalize(dir);
     scattered = Ray(rec.p + rec.normal * 0.0001f, dir);
     attenuation = albedo;
-    pdf = glm::dot(rec.normal, dir) / M_PI;
+    pdf = glm::dot(rec.normal, dir) / glm::pi<float>();
     // return true;
 
     return glm::dot(rec.normal, ray.direction()) < 0;
@@ -57,7 +58,7 @@ public:
 
   virtual float scattering_pdf(const Ray& ray, const HitRecord& rec, const Ray& scattered) const override {
     auto cosine = glm::dot(rec.normal, scattered.direction());
-    return cosine < 0.0f ? 0.0f : cosine / M_PI;
+    return cosine < 0.0f ? 0.0f : cosine / glm::pi<float>();
   }
 
   glm::vec3 albedo;

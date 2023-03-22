@@ -9,6 +9,7 @@
 #include <glm/ext/scalar_common.hpp>
 #include <glm/geometric.hpp>
 #include <glm/gtx/intersect.hpp>
+#include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <istream>
 #include <memory>
@@ -70,7 +71,7 @@ float Sphere::pdf(const HitRecord& rec, const glm::vec3& wi) const {
     }
     auto len = glm::length(center - rec.p);
     auto cos_theta_max = sqrt(1 - radius * radius / len * len);
-    float solid_angle = 2 * M_PI * (1 - cos_theta_max);
+    float solid_angle = 2 * glm::pi<float>() * (1 - cos_theta_max);
     return 1 / solid_angle;
 }
 

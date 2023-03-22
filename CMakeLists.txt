@@ -12,7 +12,7 @@ file(GLOB MY_SOURCE_FILES "src/*.cpp" "src/*.h")
 
 add_executable(arrow ${MY_SOURCE_FILES})
 
-target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
+# target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
 
 
 find_package(OpenMP)
