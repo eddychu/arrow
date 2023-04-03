@@ -177,7 +177,7 @@ void scene5() {
   PathIntegrator integrator;
   int width = 600;
   int height = 600;
-  Renderer renderer(width, height, 1000, 10, &integrator);
+  Renderer renderer(width, height, 1, 10, &integrator);
   Camera camera(glm::vec3(278.0f, 278.0f, -800.0f),
                 glm::vec3(278.0f, 278.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
                 40.0f, float(width) / float(height));
@@ -292,4 +292,19 @@ void scene5() {
   scene.build();
   renderer.render(scene, camera);
   renderer.save("scene523.png");
+}
+
+void scene6() {
+    int width = 600;
+    int height = 600;
+    RandomSampler sampler;
+    PathIntegrator integrator;
+    Renderer renderer(width, height, 1, 10, &integrator);
+    auto scene = Scene::from_file("assets/cone.obj");
+    scene->build();
+    Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f), 90.0f, 800.0f / 600.0f);
+
+    renderer.render(*scene, camera);
+    renderer.save("scene6.png");
 }

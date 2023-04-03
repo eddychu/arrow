@@ -9,10 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # glob all source and header file
 file(GLOB MY_SOURCE_FILES "src/*.cpp" "src/*.h")
 
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(arrow ${MY_SOURCE_FILES})
 
-# target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(arrow PRIVATE -Wall -Wextra -Wpedantic)
 
 
 find_package(OpenMP)
