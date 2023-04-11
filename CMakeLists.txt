@@ -20,8 +20,5 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(arrow PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
-# find and load assimp
-find_package(assimp REQUIRED)
-target_include_directories(arrow PUBLIC ${ASSIMP_INCLUDE_DIRS})
-target_link_libraries(arrow PUBLIC assimp::assimp)
-
+target_include_directories(arrow PUBLIC extern/glm)
+target_include_directories(arrow PUBLIC extern/stb)
