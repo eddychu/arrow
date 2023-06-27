@@ -291,7 +291,7 @@ void scene5() {
   scene.add(std::move(tall_block));
   scene.build();
   renderer.render(scene, camera);
-  renderer.save("scene523.png");
+  renderer.save("scene5.png");
 }
 
 void scene6() {

@@ -130,7 +130,7 @@ public:
   DiffuseLight(const glm::vec3 &a) : emit(a) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
-    return false;
+    
   }
   virtual glm::vec3 emitted(const Ray &ray,
                             const HitRecord &rec) const override {
@@ -146,4 +146,18 @@ public:
   }
 
   glm::vec3 emit;
+};
+
+
+class Phong : public Material {
+public:
+  Phong(const glm::vec3 &a, const glm::vec3 &s, float p) : diffuse(a), specular(s), shininess(p) {}
+  virtual bool scatter(const Ray &ray, const HitRecord &rec,
+                       glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
+    return false;
+  }
+
+  glm::vec3 diffuse;
+  glm::vec3 specular;
+  float shininess;
 };
