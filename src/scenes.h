@@ -177,7 +177,7 @@ void scene5() {
   PathIntegrator integrator;
   int width = 600;
   int height = 600;
-  Renderer renderer(width, height, 1, 10, &integrator);
+  Renderer renderer(width, height, 16, 10, &integrator);
   Camera camera(glm::vec3(278.0f, 278.0f, -800.0f),
                 glm::vec3(278.0f, 278.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
                 40.0f, float(width) / float(height));

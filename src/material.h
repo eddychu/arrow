@@ -130,7 +130,7 @@ public:
   DiffuseLight(const glm::vec3 &a) : emit(a) {}
   virtual bool scatter(const Ray &ray, const HitRecord &rec,
                        glm::vec3 &attenuation, Ray &scattered, float& pdf) const override {
-    
+    return false;
   }
   virtual glm::vec3 emitted(const Ray &ray,
                             const HitRecord &rec) const override {

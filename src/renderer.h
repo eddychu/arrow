@@ -23,8 +23,8 @@ public:
 #pragma omp parallel for
     for (int y = 0; y < m_height; y++) {
 
-      // std::cout << "Rendering (y = " << y << "/" << m_height << ") "
-      //           << "\r" << std::flush;
+      std::cout << "Rendering (y = " << y << "/" << m_height << ") "
+                << "\r" << std::flush;
 
       for (int x = 0; x < m_width; x++) {
         RandomSampler sampler;
